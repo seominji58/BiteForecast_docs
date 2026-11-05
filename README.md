@@ -8,6 +8,7 @@
 | `02_명세/` | 기능명세서, API 명세 |
 | `03_데이터/` | 공공 API 검증 결과, 이용허락 조건, 규제 고시 조사 |
 | `04_회의록/` | 회의록, 결정 사항 기록 |
+| `05_UX/` | UX·기능 검토, 화면 설계 |
 
 관련 레포
 - Backend (FastAPI): https://github.com/seominji58/BiteForecast_backend
