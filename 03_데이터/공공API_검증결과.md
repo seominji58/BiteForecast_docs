@@ -11,7 +11,7 @@
 |---|---|---|---|
 | 조석예보(고·저조) | `tideFcstHghLw/GetTideFcstHghLwApiService` | ✅ 사용 중 | `obsvtrNm`, `lat`, `lot`, `predcDt`, `predcTdlvVl`(cm), `extrSe` |
 | 해양관측부이 최신 관측 | `twRecent/GetTWRecentApiService` (+`min=60`) | ✅ 사용 중 | `obsrvnDt`, `wvhgt`(파고 m), `wspd`(풍속 m/s), `wtem`(수온 ℃), `wndrct`, `artmp` 등 |
-| 조석예보(시계열) | `tideFcstTime/GetTideFcstTimeApiService` (+`min`) | ⛔ 활용신청 필요 | 미검증 |
+| 조석예보(시계열) | `tideFcstTime/GetTideFcstTimeApiService` (+`min=60`) | ✅ 사용 중 | `predcDt`, `tdlvHgt`(조위 cm) |
 
 **확인된 동작**
 - `extrSe`: 1·3 = 고조(만조), 2·4 = 저조(간조). 군산 2026-11-05 응답(2=164cm, 3=546cm, 4=157cm)으로 확인했고, 수집할 때마다 값으로 다시 검증해 경고를 남긴다.
@@ -21,14 +21,18 @@
 - 미신청 API는 **HTTP 403 + JSON 오류 본문**(`returnReasonCode: 30`, `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`)으로 응답한다.
 - 관측소 목록 API는 따로 쓰지 않았다. 코드 범위(DT_0001~0099, TW_0001~0099, KG_0001~0029)를 직접 조회해서 응답한 72곳을 `backend/seeds/stations.json`에 저장했다.
 
-## 기상청 API허브 (`KMA_API_KEY`)
+## 기상청 단기예보 (공공데이터포털, `DATA_GO_KR_API_KEY`)
 
 | 데이터 | 경로 | 상태 |
 |---|---|---|
-| 단기예보 (파고 WAV·풍속 WSD) | `api/typ02/openApi/VilageFcstInfoService_2.0/getVilageFcst` | ⛔ 403 "활용신청이 필요한 API" |
-| 해양기상부이 | `api/typ01/url/kma_buoy.php` | ⛔ 403 "활용신청이 필요한 API" |
+| 단기예보 | `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst` | ✅ 사용 중 |
 
-인증키 자체는 유효하다. API허브는 **API마다 따로 활용신청**해야 한다.
+- 파라미터는 `base_date`, `base_time`(02·05·08·11·14·17·20·23시 발표), `nx`, `ny`(5km 격자), `dataType=JSON`이다.
+- 사용 항목은 `WAV`(파고 m, **0.5m 단위**)와 `WSD`(풍속 m/s)이고, 약 5일치 시간별 예보가 온다. 응답은 `{"response": {...}}`로 한 번 더 감싸져 있다.
+- 결측값은 ±900 이상(예: -999)으로 오며, 서버에서 `null`로 바꾼다.
+- 예보 격자는 **실측 부이와 같은 위치**로 정했다. 같은 지점의 실측과 예보를 나란히 보여주기 위해서다.
+- 격자 변환 공식(LCC)은 기상청 기준값(서울 종로 60,127)과 일치하는 것을 확인했다.
+- 처음 검증할 때는 **기상청 API허브**(`apihub.kma.go.kr`, `KMA_API_KEY`)로만 시험해서 403("활용신청 필요")이 나왔다. 실제로는 공공데이터포털에 신청돼 있었다. API허브는 API마다 따로 신청해야 하며, 현재는 쓰지 않는다.
 
 ## 지원 해역 (명세 D-3 제안)
 
@@ -50,7 +54,7 @@
 
 ## 남은 일
 
-- [ ] 공공데이터포털: **조석예보(시계열)** 활용신청 → 시간별 조위 그래프
-- [ ] 기상청 API허브: **단기예보** 활용신청 → 미래 날짜 파고·풍속 예보
+- [x] 조석예보(시계열) 연결 (시간별 조위)
+- [x] 기상청 단기예보 연결 (미래 날짜 파고·풍속)
 - [ ] 이용허락범위 확인 (공공누리 제1유형: 출처표시) → 앱 설정 화면에 출처 표기
 - [ ] 해역별 낚시통제구역 고시 수동 조사 (FR-17)
