@@ -11,4 +11,4 @@
 
 관련 레포
 - Backend (FastAPI): https://github.com/seominji58/BiteForecast_backend
-- Frontend (iOS SwiftUI): https://github.com/seominji58/BiteForecast_frontend
+- Frontend (React Native + Expo, iOS·Android): https://github.com/seominji58/BiteForecast_frontend
