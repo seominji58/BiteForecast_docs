@@ -6,6 +6,7 @@
 
 처음 보는 사람은 아래 순서로 확인하면 됩니다.
 
+0. [개발 배경과 사용 중인 외부 API](01_기획/2026-11-12_개발배경_및_외부API.md)
 1. [발표용 요구사항 요약](01_기획/2026-11-11_발표용_요구사항_요약.md)
 2. [시스템 아키텍처·주요 플로우차트](06_개발환경/2026-11-11_시스템_아키텍처_및_플로우차트.md)
 3. [API 명세 요약](02_명세/2026-11-11_발표용_API_명세.md)
@@ -19,9 +20,9 @@
 
 - Backend: [BiteForecast_backend](https://github.com/seominji58/BiteForecast_backend)
 - Frontend: [BiteForecast_frontend](https://github.com/seominji58/BiteForecast_frontend)
-- API 서버·수집기: 개발 Mac 로컬 실행
-- DB: SQLite(`biteforecast.db`)
-- 외부 운영 배포: 아직 하지 않음(저비용 배포안 검토 중)
+- API 서버: Fly.io(도쿄) `https://biteforecast-api.fly.dev/api/v1`
+- DB: Supabase PostgreSQL(서울) — 로컬 개발·테스트는 SQLite 도 가능
+- 수집기: GitHub Actions 매시 17분 (개발 Mac 자동 수집은 등록하지 않음)
 - 공식 데이터: 기상청 단기예보·해상 특보, 국립해양조사원 조석·부이·바다낚시지수
 - 원칙: 자료 없음은 0으로 채우지 않으며, 해상 조건을 실제 조황·어획 확률로 해석하지 않음
 
