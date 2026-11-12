@@ -1,14 +1,16 @@
-# Supabase(PostgreSQL) 사본 (2026-11-11)
+# DB (Supabase)
+
+## 1단계: 사본 만들기
 
 > 앱은 계속 SQLite 사용. 이번 작업은 **그 시점 사본**을 Supabase 에 만들고 검증한 것. 전환(DATABASE_URL 변경)은 별도 승인.
 
-## 대상
+### 대상
 - Supabase 프로젝트 `BiteForecast`, 지역 **Northeast Asia (Seoul, ap-northeast-2)**, Free
   - 처음 만든 프로젝트는 뭄바이(ap-south-1)여서 사용자가 삭제 후 서울로 다시 만듦
 - 연결: Session pooler(5432), `sslmode=require`, 클라이언트 SSL 사용 확인. 조회 평균 약 11ms
 - 주소는 `backend/.env` 의 `SUPABASE_DATABASE_URL` (Git 제외). 주소·비밀번호는 출력·기록하지 않음
 
-## 사전 점검
+### 사전 점검
 | 항목 | 결과 |
 |---|---|
 | 외래키 고아 행 | 0 |
@@ -16,36 +18,36 @@
 | 길이 초과 | `place_coord_check.status` 10행(24·26자) > 모델 16자 → **모델 길이만 32로** (값·등급 변경 없음) |
 | 시각 | UTC 저장 그대로 (의미 변화 없음) |
 
-## 절차
+### 절차
 1. 백업 `backups/biteforecast-20261111-170156-before-supabase-copy.db` (integrity ok)
 2. `python -m scripts.supabase_copy copy` — 표 30개 생성 + 복사를 한 트랜잭션으로, ID 유지·다음 번호 맞춤, 시드 넣지 않음
 3. `python -m scripts.supabase_copy verify` — 행 수 30/30 일치, 표본 대조(표당 최대 200행) 불일치 0, **낚시터 231·좌표 검증 이력 543 전부 일치**
 
-## 보안 조치 (복사 직후 발견)
+### 보안 조치 (복사 직후 발견)
 - 프로젝트 생성 때 「Automatically expose new tables」가 켜져 있어, 새 표 30개 모두 **anon·authenticated 역할이 읽기·쓰기·삭제 가능, RLS 꺼짐** 상태였음 (Data API 가 켜져 있으면 공개 키만으로 접근 가능)
 - `python -m scripts.supabase_copy lockdown`: 공개 역할 권한 전부 회수, 30개 표 RLS 켬(정책 없음 → 공개 역할 거부), 앞으로 만드는 표·시퀀스·함수도 자동 공개 안 함. 백엔드(`postgres` 소유자)는 영향 없음 — 조치 후 검증 통과
 - 노출 시간: 복사 완료 ~ 조치까지 수 분. 실제 외부 접근 여부는 Supabase **Logs → API(PostgREST)** 에서 확인 필요
 - 이후 `copy` 는 표 생성 직후 같은 트랜잭션에서 lockdown 수행, `verify` 는 공개 권한·RLS 도 검사
 
-## 되돌리기
+### 되돌리기
 - `python -m scripts.supabase_copy drop --yes` — 이 스크립트가 만든 표만 삭제. SQLite 는 변경 없음
 
-## 남은 결정
+### 남은 결정
 - 실제 전환 시점·방법 (SQLite 에 계속 쌓이는 수집·사용자 활동 → 전환 때 다시 복사)
 - 앱 코드의 SQLite 전용 부분(개발용 컬럼 자동 추가 등) → Alembic 마이그레이션으로 대체
 - 사진 파일(`media/`)은 로컬 유지
 
 ---
 
-# 전환 (2026-11-11 오후, 사용자 승인) — 앱이 Supabase 사용
+## 2단계: 앱을 Supabase 로 전환
 
-## 절차
+### 절차
 1. 8001 백엔드 2개 정지 → 마지막 SQLite 백업 `backups/biteforecast-20261111-170951-before-supabase-cutover.db`
 2. Alembic 도입, 기준 버전 `0001_baseline`(모델 30개 표). 로컬 PostgreSQL 테스트 DB 에서 생성·`alembic check` 차이 없음
 3. Supabase 비우고(drop) → Alembic 으로 표 생성 + 복사 + 공개 권한 회수 → 검증 통과(30개 표, 공개 권한 0·RLS 꺼진 표 0), `alembic check` 차이 없음
 4. `backend/.env` 에 `DATABASE_URL`(= SUPABASE_DATABASE_URL) 추가 → 백엔드 1개 재시작
 
-## 성능 (원격 DB 왕복 줄이기)
+### 성능 (원격 DB 왕복 줄이기)
 | API | 쿼리 수 전→후 | Supabase 시간 전→후 |
 |---|---|---|
 | 홈 요약 `/places-summary` | 4,919 → 23 | **60초 → 0.8초** (캐시 0.1초) |
@@ -59,28 +61,11 @@
 - 회귀 방지: `tests/test_query_budget.py` (장소·계획·기록·글이 늘어도 쿼리 수가 늘지 않음)
 - 테스트 109개: SQLite 와 로컬 PostgreSQL(`TEST_DATABASE_URL=postgresql://localhost/biteforecast_test`) 모두 통과
 
-## 운영 메모
+### 운영 메모
 - 표 구조 변경: 모델 수정 → `alembic revision --autogenerate` → 검토 → `alembic upgrade head` (승인 후). 서버는 버전이 최신이 아니면 시작하지 않음
 - 백업: `python -m scripts.supabase_copy backup` → `backups/supabase-<시각>.db` (로컬 pg_dump 14 는 Supabase 17 을 못 받음)
 - 되돌리기(SQLite 로): `.env` 의 `DATABASE_URL` 줄 삭제 → 백엔드 재시작. **전환 뒤 Supabase 에 쌓인 자료는 SQLite 에 없음** — 되돌릴 땐 backup 으로 받은 파일을 써야 함
 - `biteforecast.db`(SQLite)는 전환 시점 사본으로 남아 있음 — 더 이상 갱신되지 않음
 - 수집기(`python -m app.jobs.collect`)도 같은 설정을 읽어 이제 Supabase 에 저장 (자동 실행 등록은 여전히 안 함)
 
----
-
-# 자동 수집: GitHub Actions (2026-11-11, 사용자 승인)
-
-- 개발 Mac 자동 수집 금지 규칙은 유지하고, 수집은 GitHub Actions 에서 실행 (`backend/.github/workflows/collect.yml`)
-- **매시 17분** 1회 (공개 저장소라 사용 시간 무료). main 코드만, 포크·PR 에서는 실행 안 함, 겹쳐 실행 안 함, 30분 제한
-- 비밀값(Secrets): `DATABASE_URL`, `DATA_GO_KR_API_KEY` 두 개만 (주소·VWorld 등 다른 키는 올리지 않음). 로컬 `.env` 에서 읽어 출력 없이 등록
-- 첫 실행(수동): 성공, 9분 (하루치 밀린 자료). 예보 7,743행·관측 504·조위 946·낚시지수 1,990·특보 1
-- **공개 로그 점검**: API 키·DB 비밀번호·DB 주소·호스트 모두 로그에 없음, serviceKey 가림
-- 앱: 홈 「서해 108곳 중 내 기준 충족 107곳」 후보 카드 정상 표시 (`05_UX/screenshots/2026-11-10_ui검증_추가/08_*`)
-
-## 같이 고친 것
-- 서버가 쉬던 Supabase 연결을 다시 쓰다 2분 가까이 멈춘 뒤 오류 → 5분마다 재연결, TCP keepalive, 연결 10초 제한
-
-## 남은 점
-- 수집 상태 파일(`runtime/collector-status.json`)은 Actions 실행 환경에 남아 서버가 못 봄 → 특보 「수집 실패」 구분은 서버에서 「자료 만료」로만 보일 수 있음. DB 에 상태를 두려면 표 추가(마이그레이션, 승인 필요)
-- 실패 알림: GitHub 기본 메일 알림(실패 시) 사용
-- 특보 칩 문구가 홈 카드에서 잘림 → 「해당 특보 없음」으로 수정 (`09_*`), 배너는 긴 설명 유지
+관련: [자동 수집](../06_개발환경/자동_수집.md) · [서버 배포](서버_배포.md) · [시스템 아키텍처](../06_개발환경/시스템_아키텍처.md)

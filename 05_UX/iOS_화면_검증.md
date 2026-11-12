@@ -1,4 +1,4 @@
-# iOS 시뮬레이터 UI 검증 결과 (2026-11-09~10)
+# iOS 시뮬레이터 UI 검증 결과
 
 > 도구: Maestro 2.12.1 (Homebrew `mobile-dev-inc/tap/maestro`), Java 17 (Homebrew `openjdk@17`), iPhone 17 시뮬레이터 iOS 26.5, 개발용 앱 `com.seominji58.biteforecast`
 > 스크린샷: [screenshots/2026-11-10_ui검증/](screenshots/2026-11-10_ui검증/)
@@ -66,7 +66,7 @@
 - `back` 명령이 헤더 뒤로가기를 못 누름 → 위치로 누름
 - 한 단계가 수십 초~수 분 걸리고 가끔 멈춤 → 시간 제한을 두고 실행
 
-## 7. 이어받기 검증 (2026-11-10 오후 — Codex 작업 중단분)
+## 7. 이어받기 검증
 
 > 스크린샷: [screenshots/2026-11-10_ui검증_추가/](screenshots/2026-11-10_ui검증_추가/) (00~05 는 Codex 가 남긴 것, 06·07 추가)
 
