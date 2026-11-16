@@ -13,7 +13,7 @@
 7. [시스템 아키텍처](06_개발환경/시스템_아키텍처.md)
 8. [서버 배포 (Fly.io)](03_데이터/서버_배포.md)
 9. [DB (Supabase)](03_데이터/DB_Supabase.md)
-10. [자동 수집 (GitHub Actions)](06_개발환경/자동_수집.md)
+10. [자동 수집 (Fly 예약 머신)](06_개발환경/자동_수집.md)
 11. [API 명세](02_명세/API_명세.md)
 12. [기능명세서](02_명세/기능명세서.md)
 13. [iOS 화면 검증](05_UX/iOS_화면_검증.md)
@@ -35,7 +35,7 @@
 - Frontend: [BiteForecast_frontend](https://github.com/seominji58/BiteForecast_frontend)
 - API 서버: Fly.io(도쿄) `https://biteforecast-api.fly.dev/api/v1`
 - DB: Supabase PostgreSQL(서울) — 로컬 개발·테스트는 SQLite 도 가능
-- 수집기: GitHub Actions 매시 17분 (개발 Mac 자동 수집은 등록하지 않음)
+- 수집기: Fly.io 예약 머신 `collector` 매시간 (GitHub Actions 는 수동 백업, 개발 Mac 자동 수집은 등록하지 않음)
 - 공식 데이터: 기상청 단기예보·해상 특보, 국립해양조사원 조석·부이·바다낚시지수
 - 원칙: 자료 없음은 0으로 채우지 않으며, 해상 조건을 실제 조황·어획 확률로 해석하지 않음
 

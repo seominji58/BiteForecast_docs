@@ -15,7 +15,7 @@
 | 기상청 | 기상특보 현황 `WthrWrnInfoService/getPwnStatus` | 해상 특보·예비특보 | 〃 | ✅ 사용 중 |
 | 공공데이터포털 | 전국낚시터정보표준데이터 (파일) | 낚시터 목록(바다 유료 낚시터) | 없음 (파일 내려받기) | ✅ 낚시터 목록 생성 때 1회 |
 
-- 수집 주기: **매시 17분** GitHub Actions 에서 1회 (Mac 꺼져도 동작) → Supabase 에 저장
+- 수집 주기: **매시간** Fly.io 예약 머신 `collector` 에서 1회 → Supabase 에 저장 (2026-11-16 GitHub Actions 에서 옮김)
 - 호출 간격 0.4초, 429(호출 과다)면 재시도, 같은 발표분은 다시 받지 않음
 - 검증 기록: [공공 API 검증 결과](공공API_검증결과.md)
 
@@ -42,7 +42,8 @@
 |---|---|---|---|
 | Supabase (PostgreSQL) | DB | 서울(ap-northeast-2) · Free | `DATABASE_URL` (Fly·GitHub 비밀값, 로컬 `.env`) |
 | Fly.io | 백엔드 API 서버 `https://biteforecast-api.fly.dev/api/v1` | 도쿄(nrt) · 종량제(월 약 $2 이하 예상) | `fly secrets` |
-| GitHub Actions | 해황 자동 수집 (매시 17분) | 공개 저장소 무료 | 저장소 Secrets |
+| Fly.io 예약 머신 `collector` | 해황 자동 수집 (매시간) | 도쿄 · 월 1달러 안팎 예상 | `fly secrets` |
+| GitHub Actions | 해황 수집 수동 백업 (예약 실행 끔) | 공개 저장소 무료 | 저장소 Secrets |
 
 - 문서: [서버 배포](서버_배포.md) · [DB (Supabase)](DB_Supabase.md) · [자동 수집](../06_개발환경/자동_수집.md)
 
