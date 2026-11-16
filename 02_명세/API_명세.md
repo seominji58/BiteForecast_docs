@@ -32,7 +32,7 @@
 | POST/PATCH/DELETE | `/me/trips/{trip_id}/stops` | 계획 장소 관리 |
 | GET | `/me/trips/{trip_id}/outlook` | 계획 장소 해황 요약 |
 | GET/PUT/DELETE | `/me/favorites/{place_id}` | 즐겨찾기 |
-| GET/POST | `/community/posts` | 커뮤니티 |
+| GET/POST | `/community/posts` | 커뮤니티. 목록 거르기: `category`·`sido`·`species`·`place_id`(낚시터 이름 공개 글만)·`before_id`(최신순 더 보기). 작성: `location_visibility`(place·region·hidden, 기본 region)·`region_id`(낚시터 없이 지역만). 기록 공유(`journal_id`)는 인증 불필요 — 인증 완료면 `verified` |
 
 ## 주요 응답 원칙
 
