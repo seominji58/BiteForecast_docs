@@ -14,6 +14,7 @@
 | 기상청 | 단기예보 `VilageFcstInfoService_2.0/getVilageFcst` | 파고(WAV)·풍속(WSD)·기온(TMP)·강수확률(POP)·하늘(SKY)·강수형태(PTY) | 〃 | ✅ 사용 중 |
 | 기상청 | 기상특보 현황 `WthrWrnInfoService/getPwnStatus` | 해상 특보·예비특보 | 〃 | ✅ 사용 중 |
 | 기상청 | 중기해상예보 `MidFcstInfoService/getMidSeaFcst` | 4~10일 뒤 해역별(8곳) 파고 범위·날씨 — 단기예보가 없는 날 참고용, 조건 판정에 안 씀 | 〃 | ✅ 2026-11-17 연결 (표 `mid_sea_forecast`, 06·18시 발표분) |
+| (계산) | 물때(몇 물)·일출·일몰 — Meeus 합삭·NOAA 태양 계산식, 외부 호출 없음 | 서해 7물때식·남해·동해·제주 8물때식, 낚시터 좌표별 일출·일몰 | 없음 | ✅ 2026-11-17 (`backend/app/services/sea_calendar.py`, 바다타임 날짜 7건 대조 테스트) |
 | 공공데이터포털 | 전국낚시터정보표준데이터 (파일) | 낚시터 목록(바다 유료 낚시터) | 없음 (파일 내려받기) | ✅ 낚시터 목록 생성 때 1회 |
 
 - 수집 주기: **매시간** Fly.io 예약 머신 `collector` 에서 1회 → Supabase 에 저장 (2026-11-16 GitHub Actions 에서 옮김)
